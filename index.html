@@ -48,7 +48,16 @@
     .auth-screen.show { display:flex; }
     .auth-logo { font-size:14px; font-weight:800; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold); }
     .auth-tagline { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-muted); text-align:center; max-width:280px; line-height:1.6; }
-    .auth-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:32px 28px; width:100%; max-width:380px; box-shadow:0 4px 24px var(--shadow); }
+    .auth-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:32px 28px; width:100%; max-width:420px; box-shadow:0 4px 24px var(--shadow); }
+    
+    @media (min-width: 768px) {
+      .auth-card { max-width:480px; padding:40px 36px; }
+      .scroll { max-width:900px; margin:0 auto; width:100%; }
+    }
+    
+    @media (min-width: 1200px) {
+      .scroll { max-width:1100px; }
+    }
     .auth-tabs { display:flex; gap:8px; margin-bottom:24px; }
     .auth-tab { flex:1; padding:10px; background:transparent; border:1px solid var(--border); border-radius:10px; color:var(--text-muted); font-family:'Syne',sans-serif; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; }
     .auth-tab.active { background:var(--gold); color:#0a0a0f; border-color:var(--gold); }
@@ -83,7 +92,8 @@
     .btn-logout:active { opacity:0.7; }
     .theme-toggle { background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 10px; cursor:pointer; display:flex; align-items:center; gap:4px; color:var(--text-muted); font-family:'DM Mono',monospace; font-size:10px; font-weight:500; transition:background 0.3s; }
     .theme-toggle:active { opacity:0.7; }
-    .sync-bar { display:flex; align-items:center; gap:6px; padding:6px 20px 0; font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); }
+    .sync-bar { display:flex; align-items:center; gap:6px; padding:6px 20px 0; font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); opacity:0; transition:opacity 0.3s; }
+    .sync-bar.visible { opacity:1; }
     .sync-dot { width:6px; height:6px; border-radius:50%; background:var(--text-dim); transition:background 0.3s; }
     .sync-dot.synced  { background:var(--green); }
     .sync-dot.syncing { background:var(--gold); animation:pulse 1s infinite; }
@@ -246,7 +256,7 @@
       </div>
     </div>
 
-    <div class="sync-bar">
+    <div class="sync-bar" id="syncBar">
       <div class="sync-dot" id="syncDot"></div>
       <span id="syncText">—</span>
     </div>
@@ -639,7 +649,10 @@
 
     // ── SYNC ──
     function setSyncStatus(state, text) {
-      document.getElementById('syncDot').className = 'sync-dot '+state;
+      const bar = document.getElementById('syncBar');
+      const dot = document.getElementById('syncDot');
+      bar.classList.add('visible');
+      dot.className = 'sync-dot '+state;
       document.getElementById('syncText').textContent = text;
     }
 
