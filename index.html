@@ -36,15 +36,16 @@
     }
 
     /* ── LOADER ── */
-    .screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-    .screen.hidden { display:none; }
+    .screen { flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; }
+    .screen.show { display:flex; }
     .loader-logo { font-size:12px; font-weight:700; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; }
     .loader-spinner { width:28px; height:28px; border:2px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
     .loader-text { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-muted); margin-top:12px; }
 
     /* ── AUTH SCREEN ── */
-    .auth-screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; gap:32px; }
+    .auth-screen { flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; gap:32px; }
+    .auth-screen.show { display:flex; }
     .auth-logo { font-size:14px; font-weight:800; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold); }
     .auth-tagline { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-muted); text-align:center; max-width:280px; line-height:1.6; }
     .auth-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:32px 28px; width:100%; max-width:380px; box-shadow:0 4px 24px var(--shadow); }
@@ -63,12 +64,14 @@
     .auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--border); }
     .auth-google { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:14px; font-family:'Syne',sans-serif; font-size:13px; font-weight:600; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:background 0.2s; }
     .auth-google:active { background:var(--surface); }
-    .auth-error { background:rgba(255,92,92,0.1); border:1px solid rgba(255,92,92,0.3); border-radius:10px; padding:12px 16px; margin-bottom:16px; color:var(--danger); font-family:'DM Mono',monospace; font-size:11px; }
+    .auth-error { background:rgba(255,92,92,0.1); border:1px solid rgba(255,92,92,0.3); border-radius:10px; padding:12px 16px; margin-bottom:16px; color:var(--danger); font-family:'DM Mono',monospace; font-size:11px; display:none; }
+    .auth-error.show { display:block; }
     .auth-footer { text-align:center; margin-top:20px; font-size:11px; color:var(--text-dim); }
     .auth-footer a { color:var(--gold); text-decoration:none; }
 
     /* ── APP (même style que version perso) ── */
-    .app-screen { display:flex; flex-direction:column; flex:1; }
+    .app-screen { display:none; flex-direction:column; flex:1; }
+    .app-screen.show { display:flex; }
     .header { padding:16px 20px 0; display:flex; justify-content:space-between; align-items:center; }
     .header-left { display:flex; align-items:center; gap:10px; }
     .header-user { display:flex; align-items:center; gap:8px; }
@@ -164,14 +167,14 @@
   <canvas id="confetti-canvas"></canvas>
 
   <!-- LOADER -->
-  <div class="screen" id="loaderScreen">
+  <div class="screen show" id="loaderScreen">
     <div class="loader-logo">▲ PEA Tracker</div>
     <div class="loader-spinner"></div>
     <div class="loader-text">Chargement…</div>
   </div>
 
   <!-- AUTH -->
-  <div class="auth-screen screen hidden" id="authScreen">
+  <div class="auth-screen screen" id="authScreen">
     <div>
       <div class="auth-logo">▲ PEA TRACKER</div>
       <div class="auth-tagline">Suivez l'évolution de votre PEA et estimez quand vous atteindrez le plafond de 150 000 €</div>
@@ -181,7 +184,7 @@
         <button class="auth-tab active" id="tabSignin" onclick="switchTab('signin')">Connexion</button>
         <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Inscription</button>
       </div>
-      <div id="authError" class="auth-error hidden"></div>
+      <div id="authError" class="auth-error"></div>
       
       <!-- SIGNIN -->
       <div id="signinForm">
@@ -197,7 +200,7 @@
       </div>
       
       <!-- SIGNUP -->
-      <div id="signupForm" class="hidden">
+      <div id="signupForm" style="display:none">
         <div class="auth-field">
           <label>Prénom</label>
           <input type="text" id="signupName" placeholder="Votre prénom" maxlength="30" />
@@ -226,7 +229,7 @@
   </div>
 
   <!-- APP (code identique à la version perso, juste le header change) -->
-  <div class="app-screen screen hidden" id="appScreen">
+  <div class="app-screen screen" id="appScreen">
     <div class="header">
       <div class="header-left">
         <div class="header-user">
@@ -380,15 +383,15 @@
     });
 
     function showAuth() {
-      document.getElementById('loaderScreen').classList.add('hidden');
-      document.getElementById('authScreen').classList.remove('hidden');
-      document.getElementById('appScreen').classList.add('hidden');
+      document.getElementById('loaderScreen').classList.remove('show');
+      document.getElementById('authScreen').classList.add('show');
+      document.getElementById('appScreen').classList.remove('show');
     }
 
     async function showApp() {
-      document.getElementById('loaderScreen').classList.add('hidden');
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('appScreen').classList.remove('hidden');
+      document.getElementById('loaderScreen').classList.remove('show');
+      document.getElementById('authScreen').classList.remove('show');
+      document.getElementById('appScreen').classList.add('show');
 
       const name = currentUser.displayName || currentUser.email.split('@')[0];
       const initial = name[0].toUpperCase();
@@ -426,13 +429,13 @@
       if (tab === 'signin') {
         document.getElementById('tabSignin').classList.add('active');
         document.getElementById('tabSignup').classList.remove('active');
-        document.getElementById('signinForm').classList.remove('hidden');
-        document.getElementById('signupForm').classList.add('hidden');
+        document.getElementById('signinForm').style.display = 'block';
+        document.getElementById('signupForm').style.display = 'none';
       } else {
         document.getElementById('tabSignup').classList.add('active');
         document.getElementById('tabSignin').classList.remove('active');
-        document.getElementById('signupForm').classList.remove('hidden');
-        document.getElementById('signinForm').classList.add('hidden');
+        document.getElementById('signupForm').style.display = 'block';
+        document.getElementById('signinForm').style.display = 'none';
       }
       hideError();
     };
@@ -485,10 +488,10 @@
     function showError(msg) {
       const el = document.getElementById('authError');
       el.textContent = msg;
-      el.classList.remove('hidden');
+      el.classList.add('show');
     }
     function hideError() {
-      document.getElementById('authError').classList.add('hidden');
+      document.getElementById('authError').classList.remove('show');
     }
 
     // ── THEME ──
