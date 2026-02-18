@@ -154,14 +154,33 @@
     
     /* RESPONSIVE */
     @media (min-width:768px) {
-      .scroll { max-width:900px; margin:0 auto; padding-left:24px; padding-right:24px; }
-      .header { padding-left:calc((100vw - 900px)/2 + 24px); padding-right:calc((100vw - 900px)/2 + 24px); }
-      .sync-bar { padding-left:calc((100vw - 900px)/2 + 24px); padding-right:calc((100vw - 900px)/2 + 24px); }
+      .scroll { max-width:960px; margin:0 auto; padding-left:24px; padding-right:24px; }
+      .header { padding-left:calc((100vw - 960px)/2 + 24px); padding-right:calc((100vw - 960px)/2 + 24px); }
+      .sync-bar { padding-left:calc((100vw - 960px)/2 + 24px); padding-right:calc((100vw - 960px)/2 + 24px); }
+      .stats-row { grid-template-columns:repeat(4,1fr); }
     }
-    @media (min-width:1200px) {
-      .scroll { max-width:1100px; }
-      .header { padding-left:calc((100vw - 1100px)/2 + 24px); padding-right:calc((100vw - 1100px)/2 + 24px); }
-      .sync-bar { padding-left:calc((100vw - 1100px)/2 + 24px); padding-right:calc((100vw - 1100px)/2 + 24px); }
+    @media (min-width:1100px) {
+      .scroll {
+        max-width:1400px;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        column-gap:20px;
+        align-items:start;
+      }
+      .header { padding-left:calc((100vw - 1400px)/2 + 24px); padding-right:calc((100vw - 1400px)/2 + 24px); }
+      .sync-bar { padding-left:calc((100vw - 1400px)/2 + 24px); padding-right:calc((100vw - 1400px)/2 + 24px); }
+      .hero { grid-column:1 / -1; }
+      .stats-row { grid-column:1; grid-template-columns:repeat(2,1fr); }
+      .chart-card { grid-column:2; grid-row:2 / 4; }
+      .est-card { grid-column:1; }
+      .section-title { grid-column:1 / -1; }
+      .history-list { grid-column:1 / -1; }
+      .chart-wrap { height:200px; }
+    }
+    @media (min-width:1600px) {
+      .scroll { max-width:1600px; }
+      .header { padding-left:calc((100vw - 1600px)/2 + 24px); padding-right:calc((100vw - 1600px)/2 + 24px); }
+      .sync-bar { padding-left:calc((100vw - 1600px)/2 + 24px); padding-right:calc((100vw - 1600px)/2 + 24px); }
     }
   </style>
 </head>
