@@ -120,8 +120,11 @@
     .history-date { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-muted); }
     .history-note { font-size:12px; color:var(--text-dim); font-style:italic; }
     .history-amount { font-family:'DM Mono',monospace; font-size:16px; font-weight:500; color:var(--green); }
-    .history-delete { background:none; border:none; color:var(--text-dim); font-size:16px; padding:4px 8px; cursor:pointer; border-radius:8px; margin-left:10px; }
+    .history-delete { background:none; border:none; color:var(--text-dim); font-size:16px; padding:4px 8px; cursor:pointer; border-radius:8px; margin-left:4px; }
     .history-delete:active { color:var(--danger); background:rgba(255,92,92,0.1); }
+    .history-edit { background:none; border:none; color:var(--text-dim); font-size:14px; padding:4px 8px; cursor:pointer; border-radius:8px; margin-left:10px; }
+    .history-edit:active { color:var(--gold); background:rgba(201,168,76,0.1); }
+    .auto-badge { display:inline-block; font-size:9px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; background:rgba(62,207,142,0.12); color:var(--green); border:1px solid rgba(62,207,142,0.25); border-radius:6px; padding:2px 6px; margin-left:6px; }
     .empty-state { text-align:center; padding:30px; color:var(--text-dim); font-family:'DM Mono',monospace; font-size:12px; }
     .fab { position:fixed; bottom:calc(24px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:100; display:flex; gap:10px; }
     .btn-add { background:var(--gold); color:#0a0a0f; border:none; border-radius:40px; padding:16px 28px; font-family:'Syne',sans-serif; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 4px 20px rgba(201,168,76,0.4); }
@@ -286,12 +289,30 @@
     </div>
   </div>
 
+  <!-- EDIT VERSEMENT -->
+  <div class="overlay" id="editOverlay" onclick="if(event.target===this)closeModal('editOverlay')">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Modifier le versement</div>
+      <div class="field"><label>Montant (€)</label><input type="number" id="editAmount" inputmode="decimal" placeholder="1 000" min="0" /></div>
+      <div class="field"><label>Date</label><input type="date" id="editDate" /></div>
+      <div class="field"><label>Note (optionnel)</label><input type="text" id="editNote" placeholder="Épargne mensuelle…" maxlength="40" /></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('editOverlay')">Annuler</button>
+        <button class="btn-confirm" onclick="saveEditVersement()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
   <div class="overlay" id="settingsOverlay" onclick="if(event.target===this)closeModal('settingsOverlay')">
     <div class="modal">
       <div class="modal-handle"></div>
       <div class="modal-title">Paramètres</div>
       <div class="field"><label>Solde de départ (€)</label><input type="number" id="inputSoldeDepart" inputmode="decimal" placeholder="50 000" min="0" /></div>
       <div class="field"><label>Versement mensuel estimé (€)</label><input type="number" id="inputMonthly" inputmode="decimal" placeholder="500" min="0" /></div>
+      <div class="field"><label>Versement automatique mensuel (€)</label><input type="number" id="inputMontantAuto" inputmode="decimal" placeholder="500" min="0" /></div>
+      <div class="field"><label>Jour du versement automatique (1–28)</label><input type="number" id="inputJourVersement" inputmode="numeric" placeholder="1" min="1" max="28" /></div>
       <div class="settings-info" id="settingsInfo"></div>
       <div class="danger-zone">
         <div class="danger-zone-title">⚠ Zone danger</div>
@@ -304,10 +325,26 @@
     </div>
   </div>
 
+  <!-- ONBOARDING (nouveau compte) -->
+  <div class="overlay" id="onboardingOverlay">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Bienvenue ! Configurez votre PEA</div>
+      <p class="settings-info">Paramétrez votre tracker en quelques secondes. Vous pourrez modifier ces valeurs plus tard dans les réglages.</p>
+      <div class="field"><label>Solde de départ (€)</label><input type="number" id="onboardSolde" inputmode="decimal" placeholder="ex : 50 000" min="0" /></div>
+      <div class="field"><label>Montant du versement automatique mensuel (€)</label><input type="number" id="onboardMontant" inputmode="decimal" placeholder="ex : 500" min="0" /></div>
+      <div class="field"><label>Jour du mois pour le versement automatique (1–28)</label><input type="number" id="onboardJour" inputmode="numeric" placeholder="ex : 5" min="1" max="28" /></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('onboardingOverlay')">Passer</button>
+        <button class="btn-confirm" onclick="saveOnboarding()">Commencer</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, collection, addDoc, deleteDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
     const app = initializeApp({
       apiKey:"AIzaSyDvgEu3IaEev29mQ0sU4jeYDl9HzGnTgcE",
@@ -321,7 +358,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let user, unsub, settings={soldeDepart:0,monthly:0}, firstLoad=true, versements=null;
+    let user, unsub, settings={soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''}, firstLoad=true, versements=null, pendingOnboarding=false, editingId=null;
 
     onAuthStateChanged(auth, u => u ? (user=u,showApp()) : (user=null,showAuth()));
 
@@ -343,8 +380,19 @@
 
       try {
         const s = await getDoc(doc(db,'users',user.uid));
-        settings = s.exists() ? {soldeDepart:s.data().soldeDepart||0,monthly:s.data().monthly||0} : {soldeDepart:0,monthly:0};
-      } catch(e) { settings={soldeDepart:0,monthly:0}; }
+        if(s.exists()) {
+          const d=s.data();
+          settings = {
+            soldeDepart:d.soldeDepart||0,
+            monthly:d.monthly||0,
+            montantAuto:d.montantAuto||0,
+            jourVersement:d.jourVersement||0,
+            lastAutoMonth:d.lastAutoMonth||''
+          };
+        } else {
+          settings={soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''};
+        }
+      } catch(e) { settings={soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''}; }
 
       if(unsub) unsub();
       const q = query(collection(db,'users',user.uid,'versements'),orderBy('date','desc'));
@@ -353,10 +401,18 @@
         versements = snap.docs.map(d=>({id:d.id,...d.data()}));
         const isNew = !firstLoad && snap.docChanges().some(c=>c.type==='added');
         if(isNew) launchConfetti();
-        firstLoad=false;
+        if(firstLoad) {
+          firstLoad=false;
+          checkAutoVersement();
+        } else { firstLoad=false; }
         setSyncStatus('synced','Synchronisé');
         render(versements);
       },()=>setSyncStatus('syncing','Erreur'));
+
+      if(pendingOnboarding) {
+        pendingOnboarding=false;
+        setTimeout(()=>openOnboarding(),600);
+      }
     }
 
     window.switchTab = t => {
@@ -374,10 +430,12 @@
       if(!name||!email||!pass) return showError('Tous les champs sont requis');
       if(pass.length<6) return showError('Mot de passe trop court (min 6 caractères)');
       try {
+        pendingOnboarding=true;
         const c = await createUserWithEmailAndPassword(auth,email,pass);
         await updateProfile(c.user,{displayName:name});
-        await setDoc(doc(db,'users',c.user.uid),{name,email,soldeDepart:0,monthly:0});
+        await setDoc(doc(db,'users',c.user.uid),{name,email,soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''});
       } catch(e) {
+        pendingOnboarding=false;
         showError(e.code==='auth/email-already-in-use'?'Cet email est déjà utilisé':'Erreur: '+e.message);
       }
     };
@@ -397,7 +455,10 @@
       try {
         const r = await signInWithPopup(auth,new GoogleAuthProvider());
         const s = await getDoc(doc(db,'users',r.user.uid));
-        if(!s.exists()) await setDoc(doc(db,'users',r.user.uid),{name:r.user.displayName,email:r.user.email,soldeDepart:0,monthly:0});
+        if(!s.exists()) {
+          pendingOnboarding=true;
+          await setDoc(doc(db,'users',r.user.uid),{name:r.user.displayName,email:r.user.email,soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''});
+        }
       } catch(e) { showError('Erreur de connexion Google'); }
     };
 
@@ -598,12 +659,13 @@
         list.innerHTML=v.map(v=>`
           <div class="history-item">
             <div class="history-left">
-              <div class="history-date">${fmtDate(v.date)}</div>
-              ${v.note?`<div class="history-note">${v.note}</div>`:''}
+              <div class="history-date">${fmtDate(v.date)}${v.auto?'<span class="auto-badge">auto</span>':''}</div>
+              ${v.note&&!v.auto?`<div class="history-note">${v.note}</div>`:''}
             </div>
             <div style="display:flex;align-items:center">
               <div class="history-amount">+${fmtEur(v.amount)} €</div>
-              <button class="history-delete" onclick="deleteVersement('${v.id}')">✕</button>
+              <button class="history-edit" onclick="openEditVersement('${v.id}')" title="Modifier">✏</button>
+              <button class="history-delete" onclick="deleteVersement('${v.id}')" title="Supprimer">✕</button>
             </div>
           </div>
         `).join('');
@@ -638,21 +700,106 @@
       } catch(e) { setSyncStatus('syncing','Erreur'); }
     };
 
+    window.openEditVersement = id=> {
+      const v = versements.find(x=>x.id===id);
+      if(!v) return;
+      editingId=id;
+      document.getElementById('editAmount').value=v.amount;
+      document.getElementById('editDate').value=v.date;
+      document.getElementById('editNote').value=v.note||'';
+      document.getElementById('editOverlay').classList.add('open');
+      setTimeout(()=>document.getElementById('editAmount').focus(),400);
+    };
+
+    window.saveEditVersement = async ()=> {
+      const amount=parseFloat(document.getElementById('editAmount').value);
+      const date=document.getElementById('editDate').value;
+      const note=document.getElementById('editNote').value.trim();
+      if(!amount||amount<=0||!date||!editingId) return;
+      setSyncStatus('syncing','Enregistrement…');
+      try {
+        await updateDoc(doc(db,'users',user.uid,'versements',editingId),{amount,date,note,auto:false});
+        editingId=null;
+        closeModal('editOverlay');
+      } catch(e) { setSyncStatus('syncing','Erreur'); }
+    };
+
+    async function checkAutoVersement() {
+      if(!settings.montantAuto||settings.montantAuto<=0) return;
+      if(!settings.jourVersement||settings.jourVersement<=0) return;
+      const now=new Date();
+      const currentMonth=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      if(settings.lastAutoMonth===currentMonth) return;
+      if(now.getDate()<settings.jourVersement) return;
+      const autoDate=`${currentMonth}-${String(settings.jourVersement).padStart(2,'0')}`;
+      setSyncStatus('syncing','Versement auto…');
+      try {
+        await addDoc(collection(db,'users',user.uid,'versements'),{
+          amount:settings.montantAuto,
+          date:autoDate,
+          note:'Versement automatique',
+          auto:true
+        });
+        settings.lastAutoMonth=currentMonth;
+        await setDoc(doc(db,'users',user.uid),{lastAutoMonth:currentMonth},{merge:true});
+      } catch(e) { setSyncStatus('syncing','Erreur'); }
+    }
+
+    window.openOnboarding = ()=> {
+      document.getElementById('onboardSolde').value='';
+      document.getElementById('onboardMontant').value='';
+      document.getElementById('onboardJour').value='';
+      document.getElementById('onboardingOverlay').classList.add('open');
+    };
+
+    window.saveOnboarding = async ()=> {
+      const solde=parseFloat(document.getElementById('onboardSolde').value)||0;
+      const montant=parseFloat(document.getElementById('onboardMontant').value)||0;
+      const jour=parseInt(document.getElementById('onboardJour').value)||0;
+      const clampedJour=Math.min(28,Math.max(0,jour));
+      settings.soldeDepart=solde;
+      settings.montantAuto=montant;
+      settings.jourVersement=clampedJour;
+      settings.monthly=montant;
+      setSyncStatus('syncing','Sauvegarde…');
+      try {
+        await setDoc(doc(db,'users',user.uid),{
+          soldeDepart:solde,
+          montantAuto:montant,
+          jourVersement:clampedJour,
+          monthly:montant
+        },{merge:true});
+        closeModal('onboardingOverlay');
+        if(versements) render(versements);
+        setSyncStatus('synced','Synchronisé');
+      } catch(e) { setSyncStatus('syncing','Erreur'); }
+    };
+
     window.openSettings = ()=> {
       document.getElementById('inputSoldeDepart').value=settings.soldeDepart||'';
       document.getElementById('inputMonthly').value=settings.monthly||'';
-      document.getElementById('settingsInfo').textContent=settings.soldeDepart
-        ?`Solde de départ : ${fmtEur(settings.soldeDepart)} €\nVersement estimé : ${settings.monthly?fmtEur(settings.monthly)+'€/mois':'Non défini'}`
-        :'';
+      document.getElementById('inputMontantAuto').value=settings.montantAuto||'';
+      document.getElementById('inputJourVersement').value=settings.jourVersement||'';
+      let info='';
+      if(settings.soldeDepart) info+=`Solde de départ : ${fmtEur(settings.soldeDepart)} €\n`;
+      if(settings.montantAuto&&settings.jourVersement) info+=`Auto : ${fmtEur(settings.montantAuto)} € le ${settings.jourVersement} de chaque mois`;
+      document.getElementById('settingsInfo').textContent=info;
       document.getElementById('settingsOverlay').classList.add('open');
     };
 
     window.saveSettings = async ()=> {
       settings.soldeDepart=parseFloat(document.getElementById('inputSoldeDepart').value)||0;
       settings.monthly=parseFloat(document.getElementById('inputMonthly').value)||0;
+      settings.montantAuto=parseFloat(document.getElementById('inputMontantAuto').value)||0;
+      settings.jourVersement=Math.min(28,Math.max(0,parseInt(document.getElementById('inputJourVersement').value)||0));
       setSyncStatus('syncing','Sauvegarde…');
       try {
-        await setDoc(doc(db,'users',user.uid),settings,{merge:true});
+        await setDoc(doc(db,'users',user.uid),{
+          soldeDepart:settings.soldeDepart,
+          monthly:settings.monthly,
+          montantAuto:settings.montantAuto,
+          jourVersement:settings.jourVersement
+        },{merge:true});
         closeModal('settingsOverlay');
         if(versements) render(versements);
         setSyncStatus('synced','Synchronisé');
@@ -665,7 +812,7 @@
       try {
         const snap=await getDocs(collection(db,'users',user.uid,'versements'));
         await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));
-        settings={soldeDepart:0,monthly:0};
+        settings={soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''};
         await setDoc(doc(db,'users',user.uid),settings,{merge:true});
         closeModal('settingsOverlay');
         setSyncStatus('synced','Synchronisé');
@@ -675,10 +822,12 @@
     window.closeModal = id => document.getElementById(id).classList.remove('open');
 
     document.addEventListener('keydown',e=>{
-      if(e.key==='Escape') { closeModal('addOverlay'); closeModal('settingsOverlay'); }
+      if(e.key==='Escape') { closeModal('addOverlay'); closeModal('editOverlay'); closeModal('settingsOverlay'); closeModal('onboardingOverlay'); }
       if(e.key==='Enter') {
         if(document.getElementById('addOverlay').classList.contains('open')) addVersement();
+        if(document.getElementById('editOverlay').classList.contains('open')) saveEditVersement();
         if(document.getElementById('settingsOverlay').classList.contains('open')) saveSettings();
+        if(document.getElementById('onboardingOverlay').classList.contains('open')) saveOnboarding();
       }
     });
 
