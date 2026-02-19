@@ -153,34 +153,41 @@
     #confetti-canvas { position:fixed; inset:0; pointer-events:none; z-index:999; }
     
     /* RESPONSIVE */
+    .main-grid { width:100%; display:flex; flex-direction:column; gap:16px; }
+    .main-grid > * { margin-bottom:0; }
+
     @media (min-width:768px) {
-      .scroll { max-width:960px; margin:0 auto; padding-left:24px; padding-right:24px; }
-      .header { padding-left:calc((100vw - 960px)/2 + 24px); padding-right:calc((100vw - 960px)/2 + 24px); }
-      .sync-bar { padding-left:calc((100vw - 960px)/2 + 24px); padding-right:calc((100vw - 960px)/2 + 24px); }
+      .scroll { padding-left:24px; padding-right:24px; }
+      .main-grid { max-width:960px; margin:0 auto; }
+      .header { padding-left:max(24px, calc((100vw - 960px) / 2)); padding-right:max(24px, calc((100vw - 960px) / 2)); }
+      .sync-bar { padding-left:max(24px, calc((100vw - 960px) / 2)); padding-right:max(24px, calc((100vw - 960px) / 2)); }
       .stats-row { grid-template-columns:repeat(4,1fr); }
     }
+
     @media (min-width:1100px) {
-      .scroll {
+      .main-grid {
         max-width:1400px;
         display:grid;
         grid-template-columns:1fr 1fr;
         column-gap:20px;
+        row-gap:16px;
         align-items:start;
       }
-      .header { padding-left:calc((100vw - 1400px)/2 + 24px); padding-right:calc((100vw - 1400px)/2 + 24px); }
-      .sync-bar { padding-left:calc((100vw - 1400px)/2 + 24px); padding-right:calc((100vw - 1400px)/2 + 24px); }
-      .hero { grid-column:1 / -1; }
-      .stats-row { grid-column:1; grid-template-columns:repeat(2,1fr); }
-      .chart-card { grid-column:2; grid-row:2 / 4; }
-      .est-card { grid-column:1; }
-      .section-title { grid-column:1 / -1; }
-      .history-list { grid-column:1 / -1; }
-      .chart-wrap { height:200px; }
+      .header { padding-left:max(24px, calc((100vw - 1400px) / 2)); padding-right:max(24px, calc((100vw - 1400px) / 2)); }
+      .sync-bar { padding-left:max(24px, calc((100vw - 1400px) / 2)); padding-right:max(24px, calc((100vw - 1400px) / 2)); }
+      .hero         { grid-column:1 / -1; }
+      .stats-row    { grid-column:1; grid-row:2; grid-template-columns:repeat(2,1fr); }
+      .chart-card   { grid-column:2; grid-row:2 / 5; }
+      .est-card     { grid-column:1; grid-row:3; }
+      .section-title{ grid-column:1 / -1; grid-row:5; }
+      .history-list { grid-column:1 / -1; grid-row:6; }
+      .chart-wrap   { height:240px; }
     }
+
     @media (min-width:1600px) {
-      .scroll { max-width:1600px; }
-      .header { padding-left:calc((100vw - 1600px)/2 + 24px); padding-right:calc((100vw - 1600px)/2 + 24px); }
-      .sync-bar { padding-left:calc((100vw - 1600px)/2 + 24px); padding-right:calc((100vw - 1600px)/2 + 24px); }
+      .main-grid { max-width:1600px; }
+      .header { padding-left:max(24px, calc((100vw - 1600px) / 2)); padding-right:max(24px, calc((100vw - 1600px) / 2)); }
+      .sync-bar { padding-left:max(24px, calc((100vw - 1600px) / 2)); padding-right:max(24px, calc((100vw - 1600px) / 2)); }
     }
   </style>
 </head>
@@ -245,46 +252,48 @@
       <span id="syncText">—</span>
     </div>
     <div class="scroll">
-      <div class="hero">
-        <div class="hero-label">Total versé</div>
-        <div class="hero-amount"><span>€</span><span id="heroAmount">0</span></div>
-        <div class="hero-sub">Reste <b id="heroRemain">150 000</b> € pour atteindre le plafond</div>
-        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-        <div class="progress-labels"><span>0 €</span><span class="progress-pct" id="progressPct">0%</span><span>150 000 €</span></div>
-      </div>
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-label">Versements</div>
-          <div class="stat-value" id="statCount">0</div>
-          <div class="stat-sub">opérations</div>
+      <div class="main-grid">
+        <div class="hero">
+          <div class="hero-label">Total versé</div>
+          <div class="hero-amount"><span>€</span><span id="heroAmount">0</span></div>
+          <div class="hero-sub">Reste <b id="heroRemain">150 000</b> € pour atteindre le plafond</div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+          <div class="progress-labels"><span>0 €</span><span class="progress-pct" id="progressPct">0%</span><span>150 000 €</span></div>
         </div>
-        <div class="stat-card highlight">
-          <div class="stat-label">Moy. mensuelle</div>
-          <div class="stat-value green" id="statAvg">—</div>
-          <div class="stat-sub">sur <span id="statMonths">0</span> mois</div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">Versements</div>
+            <div class="stat-value" id="statCount">0</div>
+            <div class="stat-sub">opérations</div>
+          </div>
+          <div class="stat-card highlight">
+            <div class="stat-label">Moy. mensuelle</div>
+            <div class="stat-value green" id="statAvg">—</div>
+            <div class="stat-sub">sur <span id="statMonths">0</span> mois</div>
+          </div>
         </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Évolution du PEA</div>
-          <div class="chart-total" id="chartTotal"></div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">Évolution du PEA</div>
+            <div class="chart-total" id="chartTotal"></div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chartCanvas"></canvas>
+            <div class="chart-empty hidden" id="chartEmpty">Ajoute des versements pour voir le graphique</div>
+          </div>
         </div>
-        <div class="chart-wrap">
-          <canvas id="chartCanvas"></canvas>
-          <div class="chart-empty hidden" id="chartEmpty">Ajoute des versements pour voir le graphique</div>
+        <div class="est-card">
+          <div class="est-icon">🎯</div>
+          <div>
+            <div class="est-label">Plafond 150k€ estimé</div>
+            <div class="est-date" id="estDate">Configurer →</div>
+            <div class="est-detail" id="estDetail">Ajouter un versement mensuel estimé</div>
+          </div>
         </div>
-      </div>
-      <div class="est-card">
-        <div class="est-icon">🎯</div>
-        <div>
-          <div class="est-label">Plafond 150k€ estimé</div>
-          <div class="est-date" id="estDate">Configurer →</div>
-          <div class="est-detail" id="estDetail">Ajouter un versement mensuel estimé</div>
+        <div class="section-title">Historique</div>
+        <div class="history-list" id="historyList">
+          <div class="empty-state">Aucun versement enregistré</div>
         </div>
-      </div>
-      <div class="section-title">Historique</div>
-      <div class="history-list" id="historyList">
-        <div class="empty-state">Aucun versement enregistré</div>
       </div>
     </div>
     <div class="fab">
