@@ -152,6 +152,25 @@
     .btn-danger:active { background:rgba(255,92,92,0.1); }
     #confetti-canvas { position:fixed; inset:0; pointer-events:none; z-index:999; }
     
+    /* FAQ */
+    .faq-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:0 2px 8px var(--shadow); }
+    .faq-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; cursor:pointer; user-select:none; gap:12px; }
+    .faq-header:active { opacity:0.75; }
+    .faq-header-left { display:flex; align-items:center; gap:10px; }
+    .faq-header-icon { font-size:16px; }
+    .faq-header-title { font-size:11px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); }
+    .faq-chevron { font-family:'DM Mono',monospace; font-size:14px; color:var(--text-dim); transition:transform 0.25s; }
+    .faq-section.open .faq-chevron { transform:rotate(180deg); }
+    .faq-body { display:none; border-top:1px solid var(--border); }
+    .faq-section.open .faq-body { display:block; }
+    .faq-item { padding:16px 20px; border-bottom:1px solid var(--border); }
+    .faq-item:last-child { border-bottom:none; }
+    .faq-question { font-size:13px; font-weight:700; color:var(--text); margin-bottom:6px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .faq-question-chevron { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-dim); transition:transform 0.2s; flex-shrink:0; }
+    .faq-item.open .faq-question-chevron { transform:rotate(180deg); }
+    .faq-answer { font-family:'DM Mono',monospace; font-size:11px; color:var(--text-muted); line-height:1.7; display:none; margin-top:4px; }
+    .faq-item.open .faq-answer { display:block; }
+
     /* RESPONSIVE */
     .main-grid { width:100%; display:flex; flex-direction:column; gap:16px; }
     .main-grid > * { margin-bottom:0; }
@@ -175,12 +194,13 @@
       }
       .header { padding-left:max(24px, calc((100vw - 1400px) / 2)); padding-right:max(24px, calc((100vw - 1400px) / 2)); }
       .sync-bar { padding-left:max(24px, calc((100vw - 1400px) / 2)); padding-right:max(24px, calc((100vw - 1400px) / 2)); }
-      .hero         { grid-column:1 / -1; }
-      .stats-row    { grid-column:1; grid-row:2; grid-template-columns:repeat(2,1fr); }
-      .chart-card   { grid-column:2; grid-row:2 / 5; }
-      .est-card     { grid-column:1; grid-row:3; }
-      .section-title{ grid-column:1 / -1; grid-row:5; }
-      .history-list { grid-column:1 / -1; grid-row:6; }
+      .faq-section  { grid-column:1 / -1; grid-row:1; }
+      .hero         { grid-column:1 / -1; grid-row:2; }
+      .stats-row    { grid-column:1; grid-row:3; grid-template-columns:repeat(2,1fr); }
+      .chart-card   { grid-column:2; grid-row:3 / 6; }
+      .est-card     { grid-column:1; grid-row:4; }
+      .section-title{ grid-column:1 / -1; grid-row:6; }
+      .history-list { grid-column:1 / -1; grid-row:7; }
       .chart-wrap   { height:240px; }
     }
 
@@ -253,6 +273,55 @@
     </div>
     <div class="scroll">
       <div class="main-grid">
+
+        <!-- FAQ -->
+        <div class="faq-section" id="faqSection">
+          <div class="faq-header" onclick="toggleFaq()">
+            <div class="faq-header-left">
+              <span class="faq-header-icon">💡</span>
+              <span class="faq-header-title">Questions fréquentes</span>
+            </div>
+            <span class="faq-chevron">▾</span>
+          </div>
+          <div class="faq-body">
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaqItem(this)">
+                Qu'est-ce que le PEA ?
+                <span class="faq-question-chevron">▾</span>
+              </div>
+              <div class="faq-answer">Le Plan d'Épargne en Actions (PEA) est une enveloppe fiscale française qui permet d'investir en actions européennes avec une fiscalité avantageuse après 5 ans de détention. Les plus-values et dividendes sont exonérés d'impôt sur le revenu (hors prélèvements sociaux) après cette période.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaqItem(this)">
+                Quel est le plafond de versements ?
+                <span class="faq-question-chevron">▾</span>
+              </div>
+              <div class="faq-answer">Le plafond des versements sur un PEA classique est de 150 000 €. Ce tracker vous aide à visualiser votre progression vers ce plafond et à estimer quand vous l'atteindrez. Attention : seuls les versements comptent dans le plafond, pas la valeur du portefeuille.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaqItem(this)">
+                Comment fonctionne le versement automatique ?
+                <span class="faq-question-chevron">▾</span>
+              </div>
+              <div class="faq-answer">Configurez un montant et un jour du mois dans les Paramètres (icône ⚙️). Chaque mois, une fois ce jour atteint, le versement est ajouté automatiquement à votre historique, marqué avec le badge « auto ». Il n'est déclenché qu'une seule fois par mois.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaqItem(this)">
+                Puis-je modifier ou supprimer un versement ?
+                <span class="faq-question-chevron">▾</span>
+              </div>
+              <div class="faq-answer">Oui. Dans l'historique, chaque versement dispose d'un bouton ✏ pour le modifier (montant, date, note) et d'un bouton ✕ pour le supprimer. Les versements automatiques peuvent également être modifiés ou supprimés manuellement.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaqItem(this)">
+                Mes données sont-elles sécurisées ?
+                <span class="faq-question-chevron">▾</span>
+              </div>
+              <div class="faq-answer">Vos données sont stockées dans Firebase Firestore (Google Cloud) et accessibles uniquement avec votre compte. Elles sont isolées par utilisateur grâce aux règles de sécurité Firestore. Ce tracker ne stocke que les montants et dates de vos versements, aucune donnée bancaire.</div>
+            </div>
+          </div>
+        </div>
+
         <div class="hero">
           <div class="hero-label">Total versé</div>
           <div class="hero-amount"><span>€</span><span id="heroAmount">0</span></div>
@@ -371,7 +440,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithRedirect, getRedirectResult, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, collection, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
     const app = initializeApp({
@@ -387,6 +456,20 @@
     const db = getFirestore(app);
 
     let user, unsub, settings={soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''}, firstLoad=true, versements=null, pendingOnboarding=false, editingId=null;
+
+    // Gestion du retour après redirect Google
+    getRedirectResult(auth).then(async result => {
+      if (result && result.user) {
+        const s = await getDoc(doc(db,'users',result.user.uid));
+        if (!s.exists()) {
+          pendingOnboarding = true;
+          await setDoc(doc(db,'users',result.user.uid),{
+            name:result.user.displayName, email:result.user.email,
+            soldeDepart:0, monthly:0, montantAuto:0, jourVersement:0, lastAutoMonth:''
+          });
+        }
+      }
+    }).catch(e => console.error('Redirect result error:', e));
 
     onAuthStateChanged(auth, u => u ? (user=u,showApp()) : (user=null,showAuth()));
 
@@ -481,12 +564,7 @@
 
     window.signInWithGoogle = async ()=> {
       try {
-        const r = await signInWithPopup(auth,new GoogleAuthProvider());
-        const s = await getDoc(doc(db,'users',r.user.uid));
-        if(!s.exists()) {
-          pendingOnboarding=true;
-          await setDoc(doc(db,'users',r.user.uid),{name:r.user.displayName,email:r.user.email,soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''});
-        }
+        await signInWithRedirect(auth, new GoogleAuthProvider());
       } catch(e) { showError('Erreur de connexion Google'); }
     };
 
@@ -860,6 +938,24 @@
     });
 
     window.addEventListener('resize',()=>{ if(versements) drawChart(versements); });
+
+    window.toggleFaq = () => {
+      const el = document.getElementById('faqSection');
+      el.classList.toggle('open');
+      localStorage.setItem('pea_faq_open', el.classList.contains('open') ? '1' : '0');
+    };
+
+    window.toggleFaqItem = (el) => {
+      const item = el.closest('.faq-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    };
+
+    // Restaurer l'état ouvert/fermé de la FAQ
+    if (localStorage.getItem('pea_faq_open') === '1') {
+      document.getElementById('faqSection').classList.add('open');
+    }
 
     applyTheme(localStorage.getItem(THEME_KEY)||'dark');
   </script>
