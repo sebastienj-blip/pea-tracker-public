@@ -440,7 +440,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithRedirect, getRedirectResult, updateProfile } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, collection, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
     const app = initializeApp({
@@ -456,6 +456,20 @@
     const db = getFirestore(app);
 
     let user, unsub, settings={soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''}, firstLoad=true, versements=null, pendingOnboarding=false, editingId=null;
+
+    // Gestion du retour après redirect Google
+    getRedirectResult(auth).then(async result => {
+      if (result && result.user) {
+        const s = await getDoc(doc(db,'users',result.user.uid));
+        if (!s.exists()) {
+          pendingOnboarding = true;
+          await setDoc(doc(db,'users',result.user.uid),{
+            name:result.user.displayName, email:result.user.email,
+            soldeDepart:0, monthly:0, montantAuto:0, jourVersement:0, lastAutoMonth:''
+          });
+        }
+      }
+    }).catch(e => console.error('Redirect result error:', e));
 
     onAuthStateChanged(auth, u => u ? (user=u,showApp()) : (user=null,showAuth()));
 
@@ -550,12 +564,7 @@
 
     window.signInWithGoogle = async ()=> {
       try {
-        const r = await signInWithPopup(auth,new GoogleAuthProvider());
-        const s = await getDoc(doc(db,'users',r.user.uid));
-        if(!s.exists()) {
-          pendingOnboarding=true;
-          await setDoc(doc(db,'users',r.user.uid),{name:r.user.displayName,email:r.user.email,soldeDepart:0,monthly:0,montantAuto:0,jourVersement:0,lastAutoMonth:''});
-        }
+        await signInWithRedirect(auth, new GoogleAuthProvider());
       } catch(e) { showError('Erreur de connexion Google'); }
     };
 
